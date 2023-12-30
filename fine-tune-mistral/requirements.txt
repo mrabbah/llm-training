@@ -1,0 +1,10 @@
+transformers 
+trl 
+accelerate 
+torch
+bitsandbytes
+peft
+datasets
+optimum
+auto-gptq
+huggingface_hub

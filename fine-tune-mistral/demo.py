@@ -41,6 +41,7 @@ nf4_config = BitsAndBytesConfig(
    bnb_4bit_use_double_quant=True,
    bnb_4bit_compute_dtype=torch.bfloat16
 )
+
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
     device_map='auto',
@@ -63,7 +64,7 @@ def generate_response(prompt, model):
 
   return decoded_output[0].replace(prompt, "")
 
-generate_response("### Instruction:\nUse the provided input to create an instruction that could have been used to generate the response with an LLM.### Input:\nThere are more than 12,000 species of grass. The most common is Kentucky Bluegrass, because it grows quickly, easily, and is soft to the touch. Rygrass is shiny and bright green colored. Fescues are dark green and shiny. Bermuda grass is harder but can grow in drier soil.\n\n### Response:", model)
+# generate_response("### Instruction:\nUse the provided input to create an instruction that could have been used to generate the response with an LLM.### Input:\nThere are more than 12,000 species of grass. The most common is Kentucky Bluegrass, because it grows quickly, easily, and is soft to the touch. Rygrass is shiny and bright green colored. Fescues are dark green and shiny. Bermuda grass is harder but can grow in drier soil.\n\n### Response:", model)
 
 peft_config = LoraConfig(
     lora_alpha=16,
@@ -112,16 +113,29 @@ trainer.save_model("mistral_instruct_generation")
 
 # from huggingface_hub import notebook_login
 # notebook_login()
-# trainer.push_to_hub("ai-maker-space/mistral-instruct-generation")
-# merged_model = model.merge_and_unload()
-# def generate_response(prompt, model):
-#   encoded_input = tokenizer(prompt,  return_tensors="pt", add_special_tokens=True)
-#   model_inputs = encoded_input.to('cuda')
-# 
-#   generated_ids = model.generate(**model_inputs, max_new_tokens=1000, do_sample=True, pad_token_id=tokenizer.eos_token_id)
-# 
-#   decoded_output = tokenizer.batch_decode(generated_ids)
-# 
-#   return decoded_output[0]
-# 
-# generate_response("### Instruction:\nUse the provided input to create an instruction that could have been used to generate the response with an LLM.### Input:\nThere are more than 12,000 species of grass. The most common is Kentucky Bluegrass, because it grows quickly, easily, and is soft to the touch. Rygrass is shiny and bright green colored. Fescues are dark green and shiny. Bermuda grass is harder but can grow in drier soil.\n\n### Response:", merged_model)
+# from huggingface_hub import create_repo
+# create_repo("mrabbah/mistral-instruct-generation")
+# #from huggingface_hub import HfApi
+# #api = HfApi()
+# #api.upload_folder(
+# #    folder_path="/content/mistral_instruct_generation",
+# #    repo_id="mrabbah/mistral-instruct-generation",
+# #)
+# trainer.push_to_hub("mistral-instruct-generation")
+# tokenizer.push_to_hub("mistral-instruct-generation")
+# !zip -r /content/result.zip /content/mistral_instruct_generation
+# from google.colab import files
+# files.download("/content/result.zip")
+
+merged_model = model.merge_and_unload()
+def generate_response(prompt, model):
+  encoded_input = tokenizer(prompt,  return_tensors="pt", add_special_tokens=True)
+  model_inputs = encoded_input.to('cuda')
+
+  generated_ids = model.generate(**model_inputs, max_new_tokens=1000, do_sample=True, pad_token_id=tokenizer.eos_token_id)
+
+  decoded_output = tokenizer.batch_decode(generated_ids)
+
+  return decoded_output[0]
+
+generate_response("### Instruction:\nUse the provided input to create an instruction that could have been used to generate the response with an LLM.### Input:\nThere are more than 12,000 species of grass. The most common is Kentucky Bluegrass, because it grows quickly, easily, and is soft to the touch. Rygrass is shiny and bright green colored. Fescues are dark green and shiny. Bermuda grass is harder but can grow in drier soil.\n\n### Response:", merged_model)
