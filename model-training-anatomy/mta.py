@@ -4,6 +4,8 @@ from pynvml import *
 from transformers import TrainingArguments, Trainer, logging, AutoModelForSequenceClassification, AutoTokenizer
 import torch
 from sklearn.preprocessing import LabelEncoder
+import os
+os.environ['TORCH_CHECKPOINT_USE_REENTRANT'] = 'False'  # This option saves memory because it assumes that the graph will not be re-entered during the backward pass. It’s suitable for simpler computational graphs where reentrancy is not needed. This setting can reduce memory usage but might lead to errors or incorrect gradients for complex models requiring reentrant backward passes.
 
 # utilities function for monitoring progress:
 def print_gpu_utilization():
@@ -37,7 +39,11 @@ print(label_encoder.transform(label_encoder.classes_))
 # loading the model & the tokenizer
 MODEL_ID = "Felladrin/TinyMistral-248M-SFT-v4"
 device = "cuda" if torch.cuda.is_available() else "cpu"
-model = AutoModelForSequenceClassification.from_pretrained(MODEL_ID, device_map=device, num_labels=len(label_encoder.classes_),) 
+model = AutoModelForSequenceClassification.from_pretrained(
+    MODEL_ID, 
+    device_map=device, 
+    num_labels=len(label_encoder.classes_)
+) 
 
 print_gpu_utilization()
 
