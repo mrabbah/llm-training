@@ -1,4 +1,9 @@
-transformers
+transformers # git+https://github.com/huggingface/transformers
 datasets
 accelerate
 nvidia-ml-py3
+np
+torch
+pynvml
+bitsandbytes
+peft
